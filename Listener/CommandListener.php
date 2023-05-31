@@ -46,6 +46,10 @@ class CommandListener implements EventSubscriberInterface
         $command = $event->getCommand();
         $input = $event->getInput();
 
+        if (null === $command) {
+            return;
+        }
+
         if ($this->config->getName()) {
             $this->interactor->setApplicationName($this->config->getName(), $this->config->getLicenseKey(), $this->config->getXmit());
         }

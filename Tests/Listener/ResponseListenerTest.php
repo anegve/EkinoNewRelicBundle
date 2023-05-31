@@ -20,12 +20,26 @@ use Ekino\NewRelicBundle\Twig\NewRelicExtension;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 class ResponseListenerTest extends TestCase
 {
+    /**
+     * @var (NewRelicInteractorInterface&\PHPUnit\Framework\MockObject\MockObject)|\PHPUnit\Framework\MockObject\MockObject
+     */
+    private $interactor;
+
+    /**
+     * @var (Config&\PHPUnit\Framework\MockObject\MockObject)|\PHPUnit\Framework\MockObject\MockObject
+     */
+    private $newRelic;
+
+    /**
+     * @var (NewRelicExtension&\PHPUnit\Framework\MockObject\MockObject)|\PHPUnit\Framework\MockObject\MockObject
+     */
+    private $extension;
+
     protected function setUp(): void
     {
         $this->interactor = $this->getMockBuilder(NewRelicInteractorInterface::class)->getMock();
@@ -291,8 +305,7 @@ class ResponseListenerTest extends TestCase
     {
         $kernel = $this->getMockBuilder(HttpKernelInterface::class)->getMock();
 
-        $eventClass = class_exists(ResponseEvent::class) ? ResponseEvent::class : FilterResponseEvent::class;
-        $event = new $eventClass($kernel, $request ?? new Request(), $requestType, $response ?? new Response());
+        $event = new ResponseEvent($kernel, $request ?? new Request(), $requestType, $response ?? new Response());
 
         return $event;
     }

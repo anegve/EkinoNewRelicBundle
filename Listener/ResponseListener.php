@@ -18,7 +18,6 @@ use Ekino\NewRelicBundle\NewRelic\NewRelicInteractorInterface;
 use Ekino\NewRelicBundle\Twig\NewRelicExtension;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -53,9 +52,9 @@ class ResponseListener implements EventSubscriberInterface
         ];
     }
 
-    public function onKernelResponse(KernelResponseEvent $event): void
+    public function onKernelResponse(ResponseEvent $event): void
     {
-        $isMainRequest = method_exists($event, 'isMainRequest') ? $event->isMainRequest() : $event->isMasterRequest();
+        $isMainRequest = $event->isMainRequest();
 
         if (!$isMainRequest) {
             return;
@@ -109,13 +108,5 @@ class ResponseListener implements EventSubscriberInterface
         if ($this->symfonyCache) {
             $this->interactor->endTransaction();
         }
-    }
-}
-
-if (!class_exists(KernelResponseEvent::class)) {
-    if (class_exists(ResponseEvent::class)) {
-        class_alias(ResponseEvent::class, KernelResponseEvent::class);
-    } else {
-        class_alias(FilterResponseEvent::class, KernelResponseEvent::class);
     }
 }

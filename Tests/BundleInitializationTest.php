@@ -32,9 +32,9 @@ class BundleInitializationTest extends TestCase
         return EkinoNewRelicBundle::class;
     }
 
-    public function testInitBundle()
+    public function testInitBundle(): void
     {
-        $kernel = new AppKernel(uniqid('cache'));
+        $kernel = new AppKernel(uniqid('cache', false));
         $kernel->boot();
 
         // Get the container
@@ -46,7 +46,7 @@ class BundleInitializationTest extends TestCase
             NewRelicInteractor::class,
         ];
 
-        // Test if you services exists
+        // Test if your services exists
         foreach ($services as $id => $class) {
             if (\is_int($id)) {
                 $id = $class;

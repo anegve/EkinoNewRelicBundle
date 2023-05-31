@@ -89,7 +89,7 @@ class AppKernel extends Kernel
      * (From MicroKernelTrait)
      * {@inheritdoc}
      */
-    public function registerContainerConfiguration(LoaderInterface $loader)
+    public function registerContainerConfiguration(LoaderInterface $loader): void
     {
         $loader->load(function (ContainerBuilder $container) {
             $container->loadFromExtension('framework', [
@@ -140,7 +140,7 @@ class AppKernel extends Kernel
         $container = parent::buildContainer();
 
         $container->addCompilerPass(new class() implements CompilerPassInterface {
-            public function process(ContainerBuilder $container)
+            public function process(ContainerBuilder $container): void
             {
                 foreach ($container->getDefinitions() as $id => $definition) {
                     if (preg_match('|Ekino.*|i', $id)) {

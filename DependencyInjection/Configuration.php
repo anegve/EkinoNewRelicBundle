@@ -24,11 +24,7 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('ekino_new_relic');
-        if (method_exists(TreeBuilder::class, 'getRootNode')) {
-            $rootNode = $treeBuilder->getRootNode();
-        } else {
-            $rootNode = $treeBuilder->root('ekino_new_relic');
-        }
+        $rootNode = $treeBuilder->getRootNode();
 
         $rootNode
             ->fixXmlConfig('deployment_name')
@@ -132,7 +128,7 @@ class Configuration implements ConfigurationInterface
 
                                     $elements = [];
                                     foreach ($v['elements'] as $element) {
-                                        if (0 === strpos($element, '!')) {
+                                        if (str_starts_with($element, '!')) {
                                             if (false === $isExclusive) {
                                                 throw new InvalidConfigurationException('Cannot combine exclusive/inclusive definitions in channels list.');
                                             }

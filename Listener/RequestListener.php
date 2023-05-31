@@ -17,7 +17,6 @@ use Ekino\NewRelicBundle\NewRelic\Config;
 use Ekino\NewRelicBundle\NewRelic\NewRelicInteractorInterface;
 use Ekino\NewRelicBundle\TransactionNamingStrategy\TransactionNamingStrategyInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -58,7 +57,7 @@ class RequestListener implements EventSubscriberInterface
         ];
     }
 
-    public function setApplicationName(KernelRequestEvent $event): void
+    public function setApplicationName(RequestEvent $event): void
     {
         if (!$this->isEventValid($event)) {
             return;
@@ -80,7 +79,7 @@ class RequestListener implements EventSubscriberInterface
         }
     }
 
-    public function setTransactionName(KernelRequestEvent $event): void
+    public function setTransactionName(RequestEvent $event): void
     {
         if (!$this->isEventValid($event)) {
             return;
@@ -91,7 +90,7 @@ class RequestListener implements EventSubscriberInterface
         $this->interactor->setTransactionName($transactionName);
     }
 
-    public function setIgnoreTransaction(KernelRequestEvent $event): void
+    public function setIgnoreTransaction(RequestEvent $event): void
     {
         if (!$this->isEventValid($event)) {
             return;
@@ -110,16 +109,8 @@ class RequestListener implements EventSubscriberInterface
     /**
      * Make sure we should consider this event. Example: make sure it is a master request.
      */
-    private function isEventValid(KernelRequestEvent $event): bool
+    private function isEventValid(RequestEvent $event): bool
     {
-        return HttpKernelInterface::MASTER_REQUEST === $event->getRequestType();
-    }
-}
-
-if (!class_exists(KernelRequestEvent::class)) {
-    if (class_exists(RequestEvent::class)) {
-        class_alias(RequestEvent::class, KernelRequestEvent::class);
-    } else {
-        class_alias(GetResponseEvent::class, KernelRequestEvent::class);
+        return HttpKernelInterface::MAIN_REQUEST === $event->getRequestType();
     }
 }
