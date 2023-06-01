@@ -40,10 +40,5 @@
     },
     "autoload-dev": {
         "psr-4": { "Ekino\\NewRelicBundle\\Tests\\": "Tests/" }
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "2.0-dev"
-        }
     }
 }
