@@ -26,7 +26,6 @@
         "matthiasnoback/symfony-dependency-injection-test": "^5.1",
         "symfony/framework-bundle": "^7.0",
         "symfony/phpunit-bridge": "^7.0",
-        "phpunit/phpunit": "^9.0",
         "twig/twig": "^3.6",
         "symfony/monolog-bundle": "^3.8"
     },
