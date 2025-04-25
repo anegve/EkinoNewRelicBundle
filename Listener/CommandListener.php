@@ -53,7 +53,7 @@ class CommandListener implements EventSubscriberInterface
         if ($this->config->getName()) {
             $this->interactor->setApplicationName($this->config->getName(), $this->config->getLicenseKey(), $this->config->getXmit());
         }
-        $this->interactor->setTransactionName($command->getName());
+        $this->interactor->setTransactionName('command:'.$command->getName());
 
         // Due to newrelic's extension implementation, the method `ignoreTransaction` must be called after `setApplicationName`
         // see https://discuss.newrelic.com/t/newrelic-ignore-transaction-not-being-honored/5450/5
