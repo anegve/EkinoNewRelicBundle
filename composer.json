@@ -1,7 +1,7 @@
 {
     "name": "anegve/newrelic-bundle",
     "type": "symfony-bundle",
-    "description": "Integrate New Relic into Symfony 6",
+    "description": "Integrate New Relic into Symfony",
     "keywords": ["metric", "performance", "monitoring"],
     "homepage": "https://github.com/ekino/EkinoNewRelicBundle",
     "license": "MIT",
@@ -13,19 +13,19 @@
         }
     ],
     "require": {
-        "php": ">8.2",
+        "php": ">=8.4",
         "monolog/monolog": "^3.0",
-        "symfony/config": "^7.0",
-        "symfony/console": "^7.0",
-        "symfony/dependency-injection": "^7.0",
-        "symfony/event-dispatcher": "^7.0",
-        "symfony/http-kernel": "^7.0"
+        "symfony/config": "^7.0 || ^8.0",
+        "symfony/console": "^7.0 || ^8.0",
+        "symfony/dependency-injection": "^7.0 || ^8.0",
+        "symfony/event-dispatcher": "^7.0 || ^8.0",
+        "symfony/http-kernel": "^7.0 || ^8.0"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
-        "matthiasnoback/symfony-dependency-injection-test": "^5.1",
-        "symfony/framework-bundle": "^7.0",
-        "symfony/phpunit-bridge": "^7.0",
+        "matthiasnoback/symfony-dependency-injection-test": "^5.1 || ^6.0",
+        "symfony/framework-bundle": "^7.0 || ^8.0",
+        "symfony/phpunit-bridge": "^7.0 || ^8.0",
         "twig/twig": "^3.6",
         "symfony/monolog-bundle": "^3.8"
     },

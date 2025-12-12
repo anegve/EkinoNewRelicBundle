@@ -55,5 +55,7 @@ class BundleInitializationTest extends TestCase
             $service = $container->get($id);
             $this->assertInstanceOf($class, $service);
         }
+
+        $kernel->shutdown();
     }
 }

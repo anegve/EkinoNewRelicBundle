@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" backupGlobals="false" backupStaticAttributes="false" colors="true" convertErrorsToExceptions="true" convertNoticesToExceptions="true" convertWarningsToExceptions="true" processIsolation="false" stopOnFailure="false" bootstrap="vendor/autoload.php" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
-  <coverage>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/12.5/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         cacheDirectory=".phpunit.cache"
+         failOnRisky="false">
+  <testsuites>
+    <testsuite name="Ekino New Relic Test Suite">
+      <directory>./Tests</directory>
+    </testsuite>
+  </testsuites>
+  <source>
     <include>
       <directory>./</directory>
     </include>
@@ -9,10 +18,5 @@
       <directory>./Resources/</directory>
       <directory>./vendor/</directory>
     </exclude>
-  </coverage>
-  <testsuites>
-    <testsuite name="Ekino New Relic Test Suite">
-      <directory>./Tests</directory>
-    </testsuite>
-  </testsuites>
+  </source>
 </phpunit>

@@ -17,13 +17,14 @@ use Ekino\NewRelicBundle\Listener\ResponseListener;
 use Ekino\NewRelicBundle\NewRelic\Config;
 use Ekino\NewRelicBundle\NewRelic\NewRelicInteractorInterface;
 use Ekino\NewRelicBundle\Twig\NewRelicExtension;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 class ResponseListenerTest extends TestCase
 {
@@ -46,11 +47,11 @@ class ResponseListenerTest extends TestCase
     {
         $this->interactor = $this->getMockBuilder(NewRelicInteractorInterface::class)->getMock();
         $this->newRelic = $this->getMockBuilder(Config::class)
-            ->setMethods(['getCustomEvents', 'getCustomMetrics', 'getCustomParameters'])
+            ->onlyMethods(['getCustomEvents', 'getCustomMetrics', 'getCustomParameters'])
             ->disableOriginalConstructor()
             ->getMock();
         $this->extension = $this->getMockBuilder(NewRelicExtension::class)
-            ->setMethods(['isHeaderCalled', 'isFooterCalled', 'isUsed'])
+            ->onlyMethods(['isHeaderCalled', 'isFooterCalled', 'isUsed'])
             ->disableOriginalConstructor()
             ->getMock();
     }
@@ -94,23 +95,34 @@ class ResponseListenerTest extends TestCase
         $this->newRelic->expects($this->once())->method('getCustomMetrics')->willReturn($metrics);
         $this->newRelic->expects($this->once())->method('getCustomParameters')->willReturn($parameters);
 
-        $this->interactor->expects($this->exactly(2))->method('addCustomMetric')->withConsecutive(
-            ['foo_a', 4.7],
-            ['foo_b', 11]
+        $metricMatcher = $this->exactly(2);
+        $this->interactor->expects($metricMatcher)->method('addCustomMetric')->willReturnCallback(
+            function (string $name, float $value) use ($metricMatcher) {
+                match ($metricMatcher->numberOfInvocations()) {
+                    1 => $this->assertEquals(['foo_a', 4.7], [$name, $value]),
+                    2 => $this->assertEquals(['foo_b', 11], [$name, $value]),
+                };
+                return true;
+            }
         );
-        $this->interactor->expects($this->exactly(2))->method('addCustomParameter')->withConsecutive(
-            ['foo_1', 'bar_1'],
-            ['foo_2', 'bar_2']
+        $paramMatcher = $this->exactly(2);
+        $this->interactor->expects($paramMatcher)->method('addCustomParameter')->willReturnCallback(
+            function (string $name, $value) use ($paramMatcher) {
+                match ($paramMatcher->numberOfInvocations()) {
+                    1 => $this->assertEquals(['foo_1', 'bar_1'], [$name, $value]),
+                    2 => $this->assertEquals(['foo_2', 'bar_2'], [$name, $value]),
+                };
+                return true;
+            }
         );
-        $this->interactor->expects($this->exactly(2))->method('addCustomEvent')->withConsecutive(
-            ['WidgetSale', [
-                'color' => 'red',
-                'weight' => 12.5,
-            ]],
-            ['WidgetSale', [
-                'color' => 'blue',
-                'weight' => 12.5,
-            ]]
+        $eventMatcher = $this->exactly(2);
+        $this->interactor->expects($eventMatcher)->method('addCustomEvent')->willReturnCallback(
+            function (string $name, array $attributes) use ($eventMatcher) {
+                match ($eventMatcher->numberOfInvocations()) {
+                    1 => $this->assertEquals(['WidgetSale', ['color' => 'red', 'weight' => 12.5]], [$name, $attributes]),
+                    2 => $this->assertEquals(['WidgetSale', ['color' => 'blue', 'weight' => 12.5]], [$name, $attributes]),
+                };
+            }
         );
 
         $event = $this->createFilterResponseEventDummy();
@@ -155,9 +167,7 @@ class ResponseListenerTest extends TestCase
         $object->onKernelResponse($event);
     }
 
-    /**
-     * @dataProvider providerOnKernelResponseOnlyInstrumentHTMLResponses
-     */
+    #[DataProvider('providerOnKernelResponseOnlyInstrumentHTMLResponses')]
     public function testOnKernelResponseOnlyInstrumentHTMLResponses($content, $expectsSetContent, $contentType)
     {
         $this->setupNoCustomMetricsOrParameters();
@@ -173,7 +183,7 @@ class ResponseListenerTest extends TestCase
         $object->onKernelResponse($event);
     }
 
-    public function providerOnKernelResponseOnlyInstrumentHTMLResponses()
+    public static function providerOnKernelResponseOnlyInstrumentHTMLResponses(): array
     {
         return [
             // unsupported content types
@@ -274,9 +284,7 @@ class ResponseListenerTest extends TestCase
 
     private function createRequestMock($instrumentEnabled = true)
     {
-        $mock = $this->getMockBuilder(Request::class)
-            ->setMethods(['get'])
-            ->getMock();
+        $mock = new Request();
 
         $attributes = $this->getMockBuilder(ParameterBag::class)->getMock();
         $attributes->method('get')->willReturn($instrumentEnabled);
@@ -289,7 +297,7 @@ class ResponseListenerTest extends TestCase
     private function createResponseMock($content = null, $expectsSetContent = null, $contentType = 'text/html')
     {
         $mock = $this->getMockBuilder(Response::class)
-            ->setMethods(['getContent', 'setContent'])
+            ->onlyMethods(['getContent', 'setContent'])
             ->getMock();
 
         $responseHeaders = $this->getMockBuilder(ResponseHeaderBag::class)->getMock();
@@ -300,7 +308,16 @@ class ResponseListenerTest extends TestCase
         $mock->expects($content ? $this->any() : $this->never())->method('getContent')->willReturn($content ?? false);
 
         if ($expectsSetContent) {
-            $mock->expects($this->exactly(2))->method('setContent')->withConsecutive([''], [$expectsSetContent]);
+            $setContentMatcher = $this->exactly(2);
+            $mock->expects($setContentMatcher)->method('setContent')->willReturnCallback(
+                function (string $content) use ($setContentMatcher, $expectsSetContent, $mock) {
+                    match ($setContentMatcher->numberOfInvocations()) {
+                        1 => $this->assertEquals('', $content),
+                        2 => $this->assertEquals($expectsSetContent, $content),
+                    };
+                    return $mock;
+                }
+            );
         } else {
             $mock->expects($this->never())->method('setContent');
         }
@@ -308,7 +325,7 @@ class ResponseListenerTest extends TestCase
         return $mock;
     }
 
-    private function createFilterResponseEventDummy(Request $request = null, Response $response = null, int $requestType = HttpKernelInterface::MAIN_REQUEST)
+    private function createFilterResponseEventDummy(?Request $request = null, ?Response $response = null, int $requestType = HttpKernelInterface::MAIN_REQUEST)
     {
         $kernel = $this->createMock(HttpKernelInterface::class);
 

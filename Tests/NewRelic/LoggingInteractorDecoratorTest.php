@@ -15,14 +15,13 @@ namespace Ekino\NewRelicBundle\Tests\NewRelic;
 
 use Ekino\NewRelicBundle\NewRelic\LoggingInteractorDecorator;
 use Ekino\NewRelicBundle\NewRelic\NewRelicInteractorInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 class LoggingInteractorDecoratorTest extends TestCase
 {
-    /**
-     * @dataProvider provideMethods
-     */
+    #[DataProvider('provideMethods')]
     public function testGeneric(string $method, array $arguments, $return)
     {
         $logger = $this->createMock(LoggerInterface::class);
@@ -41,7 +40,7 @@ class LoggingInteractorDecoratorTest extends TestCase
         $this->assertSame($return, $result);
     }
 
-    public function provideMethods()
+    public static function provideMethods(): \Generator
     {
         $reflection = new \ReflectionClass(NewRelicInteractorInterface::class);
         foreach ($reflection->getMethods() as $method) {
@@ -53,40 +52,31 @@ class LoggingInteractorDecoratorTest extends TestCase
             }
 
             $arguments = array_map(function (\ReflectionParameter $parameter) {
-                return $this->getTypeStub($parameter->getType());
+                return self::getTypeStub($parameter->getType());
             }, $method->getParameters());
 
-            $return = $method->hasReturnType() ? $this->getTypeStub($method->getReturnType()) : null;
+            $return = $method->hasReturnType() ? self::getTypeStub($method->getReturnType()) : null;
 
             yield [$method->getName(), $arguments, $return];
         }
     }
 
-    private function getTypeStub(?\ReflectionType $type)
+    private static function getTypeStub(?\ReflectionType $type): mixed
     {
         if (null === $type) {
             return uniqid('', true);
         }
 
-        switch ($type->getName()) {
-            case 'string':
-                return uniqid('', true);
-            case 'bool':
-                return (bool) rand(0, 1);
-            case 'float':
-                return rand(0, 100) / rand(1, 10);
-            case 'int':
-                return rand(0, 100);
-            case 'void':
-                return null;
-            case 'Throwable':
-                return new \Exception();
-            case 'callable':
-                return function () {};
-            case 'array':
-                return array_fill(0, 2, uniqid('', true));
-            default:
-                throw new \UnexpectedValueException('Unknown type. '.$type->getName());
-        }
+        return match ($type->getName()) {
+            'string' => uniqid('', true),
+            'bool' => (bool) rand(0, 1),
+            'float' => rand(0, 100) / rand(1, 10),
+            'int' => rand(0, 100),
+            'void' => null,
+            'Throwable' => new \Exception(),
+            'callable' => function () {},
+            'array' => array_fill(0, 2, uniqid('', true)),
+            default => throw new \UnexpectedValueException('Unknown type. '.$type->getName()),
+        };
     }
 }

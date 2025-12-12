@@ -15,7 +15,7 @@ namespace Ekino\NewRelicBundle\NewRelic;
 
 class NewRelicInteractor implements NewRelicInteractorInterface
 {
-    public function setApplicationName(string $name, string $license = null, bool $xmit = false): bool
+    public function setApplicationName(string $name, ?string $license = null, bool $xmit = false): bool
     {
         return newrelic_set_appname($name, $license, $xmit);
     }
@@ -60,12 +60,12 @@ class NewRelicInteractor implements NewRelicInteractorInterface
         return newrelic_disable_autorum();
     }
 
-    public function noticeError(int $errno, string $errstr, string $errfile = null, int $errline = null, string $errcontext = null): void
+    public function noticeError(int $errno, string $errstr, ?string $errfile = null, ?int $errline = null, ?string $errcontext = null): void
     {
         newrelic_notice_error($errno, $errstr, $errfile, $errline, $errcontext);
     }
 
-    public function noticeThrowable(\Throwable $e, string $message = null): void
+    public function noticeThrowable(\Throwable $e, ?string $message = null): void
     {
         newrelic_notice_error($message ?: $e->getMessage(), $e);
     }
@@ -85,7 +85,7 @@ class NewRelicInteractor implements NewRelicInteractorInterface
         return newrelic_end_transaction($ignore);
     }
 
-    public function startTransaction(string $name = null, string $license = null): bool
+    public function startTransaction(?string $name = null, ?string $license = null): bool
     {
         if (null === $name) {
             $name = ini_get('newrelic.appname');

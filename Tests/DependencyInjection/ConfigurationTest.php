@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Ekino\NewRelicBundle\Tests\DependencyInjection;
 
 use Ekino\NewRelicBundle\DependencyInjection\Configuration;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\Definition\PrototypedArrayNode;
@@ -129,9 +130,7 @@ class ConfigurationTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider deploymentNamesProvider
-     */
+    #[DataProvider('deploymentNamesProvider')]
     public function testDeploymentNames($deploymentNameConfig, $expected)
     {
         $processor = new Processor();
@@ -143,9 +142,7 @@ class ConfigurationTest extends TestCase
         $this->assertSame($expected, $config2['deployment_names']);
     }
 
-    /**
-     * @dataProvider ignoredRoutesProvider
-     */
+    #[DataProvider('ignoredRoutesProvider')]
     public function testIgnoreRoutes($ignoredRoutesConfig, $expected)
     {
         $processor = new Processor();
@@ -155,9 +152,7 @@ class ConfigurationTest extends TestCase
         $this->assertSame($expected, $config['http']['ignored_routes']);
     }
 
-    /**
-     * @dataProvider ignoredPathsProvider
-     */
+    #[DataProvider('ignoredPathsProvider')]
     public function testIgnorePaths($ignoredPathsConfig, $expected)
     {
         $processor = new Processor();
@@ -167,9 +162,7 @@ class ConfigurationTest extends TestCase
         $this->assertSame($expected, $config['http']['ignored_paths']);
     }
 
-    /**
-     * @dataProvider ignoredCommandsProvider
-     */
+    #[DataProvider('ignoredCommandsProvider')]
     public function testIgnoreCommands($ignoredCommandsConfig, $expected)
     {
         $processor = new Processor();
